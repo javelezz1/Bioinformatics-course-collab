@@ -1,0 +1,181 @@
+## 1.3) cada que se encuentre un C, resta 1. Si se encuentra un G, suma 1. Si es A o T, pone el mismo numero.
+## en ese skew diagram esta funcion dice cual es el valor minimo.
+text= ''
+a=open('datas.txt')
+
+def skewminimum(text):
+    x=0
+    y=[0]
+    for i in text:
+        if i == 'C':
+            x = x-1
+        elif i == 'G':
+            x = x+1
+        y.append(x)
+    minimo = min(y)
+    for i,f in enumerate(y):
+        if f==minimo:
+            print(i)
+skewminimum(a.readline())
+
+## 1.4) dice el numero de mismatches entre dos secuencias p y q del mismo largo.
+
+def hammingdistance(p,q):
+    cuenta=0
+    for i,j in list(zip(p,q)):
+        if i!=j:
+            cuenta= cuenta+1
+    return(cuenta)
+hammingdistance(p, q)
+
+## 1.4) dice todas las posiciones en las que un pattern aparece en text con un maximo de d errores.
+
+def patternmatching(text, pattern, d):
+    k=len(pattern)
+    r=''
+    for i in range(0,len(text)-k+1):
+        kmer=text[i:i+k]
+        if hammingdistance(kmer, pattern) <= d:
+            r=r + ' ' + str(i)
+    print(r)
+patternmatching(text,pattern,d)
+
+## 1.4) me dice cuales son los motifs con tamaño k que mas se repiten, incluyendo los que tengan hasta d mismatches.
+
+text= 'GCCGAGGGTGTGCCGAGGGTGTAAAATTCCTTCCGCCGAAAATTCCTGTTTCCAGGGAAAAAAAATTCCAAAAAGGGGCCGTTCCTTCCTTCCGCCGAGGGAGGGGCCGTGTGCCGAAAAGCCGTTCCAAAATTCCAAAAAAAAAAAAAAAAAAAAGCCGAGGGAGGGAAAAGCCGGCCGTGTGCCGGCCGAGGGTTCCTTCCTTCCAGGGAAAATGTAAAATTCCTGTGCCGAGGGAAAAGCCGAGGGGCCGAGGGTTCCAGGGAAAAGCCGAGGGTTCCGCCGAAAAGCCGAAAATTCCTGTTTCCGCCGTTCCAGGGAGGGTTCCAAAATGTAGGGAAAA'
+d=2
+k=6
+
+def hammingdistance(p,q):
+    cuenta=0
+    for i,j in list(zip(p,q)):
+        if i!=j:
+            cuenta= cuenta+1
+    return(cuenta)
+# hammingdistance(p, q)
+
+
+def patternmatching(text, pattern, d):
+    k=len(pattern)
+    r=''
+    cuenta=0
+    for i in range(0,len(text)-k+1):
+        kmer=text[i:i+k]
+        if hammingdistance(kmer, pattern) <= d:
+            r+= ' ' + kmer
+            cuenta= cuenta+1
+    return(cuenta)
+# patternmatching(text,pattern,d)
+
+def freqwordsmismatches(text, k, d):
+    primas=[]
+    for i in range(0,len(text)-k+1):
+        tpattern= text[i: k+i]
+        if tpattern in [i[0] for i in primas]:
+            continue
+        primas.append((tpattern, patternmatching(text, tpattern, d)))
+    clist = []
+    for i in primas :
+        clist.append(i[1])
+    maximum = max(clist)
+    for i in primas :
+        if i[1] == maximum:
+            print(i[0])
+freqwordsmismatches(text, k, d)
+
+## 1.4) busca en la secuencia los kmers mas frecuentes dando margen de d mismatches y teniendo en cuenta reverse complements.
+
+def hammingdistance(p,q):
+    cuenta=0
+    for i,j in list(zip(p,q)):
+        if i!=j:
+            cuenta= cuenta+1
+    return(cuenta)
+# hammingdistance(p, q)
+ 
+def revcomp(seq):
+    seqr=''
+    for i in seq:
+        if i == "A":
+            seqr+="T"
+        elif i=="T":
+            seqr+="A"
+        elif i == "C":
+            seqr+="G"
+        elif i=="G":
+            seqr+="C"
+    seqr=seqr[::-1]
+    return(seqr)
+# revcomp(seq)
+
+def pattern_count(text, pattern):
+    count = 0
+    for i in range(0, len(text) - len(pattern) + 1):
+        if text[i : len(pattern) + i] == pattern:
+            count += 1
+    return count
+
+ 
+
+def patternmatching(text, pattern, d):
+    k=len(pattern)
+    cuenta=0
+    for i in range(0,len(text)-k+1):
+        kmer=text[i:i+k]
+        if hammingdistance(kmer, pattern) <= d:
+            cuenta = cuenta + 1
+    return(cuenta)
+# patternmatching(text,pattern,d)
+ 
+def freqwordsmismatchesyreverse(text, k, d):
+    primas=[]
+    for i in range(0,len(text)-k+1):
+        tpattern= text[i: k+i]
+        revtpattern = revcomp(tpattern)
+        if tpattern in [i[0] for i in primas]:
+          continue
+        
+        # Blindaje contra palindromicos
+        if tpattern == revtpattern:  
+          primas.append((tpattern, patternmatching(text, tpattern, d)))
+        else:
+          primas.append((tpattern, patternmatching(text, tpattern, d)+ patternmatching(text,revtpattern,d) ))
+    clist = []
+    for i in primas :
+        clist.append(i[1])
+    maximum = max(clist)
+    for i in primas :
+        if i[1] == maximum:
+          print (i[0], revcomp(i[0]))
+
+freqwordsmismatchesyreverse(text, k, d)
+
+## 1.7) generar todos los kmers posibles a una hamming distance de maximo d del pattern ingresado (neighborhood).
+
+def suffix (pattern):
+    return pattern [:len (pattern)-1]
+
+def primas (pattern, d):
+# Lista con primas
+    lista_primas = list ()
+
+    if len (pattern) == 1:
+        return ["A","C","G","T"]
+
+# Recalling para llegar al sufijo más bajo y empezar a construir primas
+    sufijo_de_patron = primas (suffix(pattern),d)
+    
+    for text in sufijo_de_patron:
+        if hammingdistance(suffix(pattern), text) < d:
+            for ncld in ["A","C","G","T"]:
+                lista_primas.append(text + ncld)
+        else:
+            lista_primas.append(text + pattern [-1])
+    return lista_primas
+
+import time    
+n = ' '
+for i in primas(pattern,d):
+    n+= ' ' + i
+print(n)
+    

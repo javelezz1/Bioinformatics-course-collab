@@ -1,0 +1,395 @@
+## 1.2) se encuentran los kmers que esten presentes a las vez en cada una de las secuencias de "dnas"
+##      con maximo d mismatches.
+k=5
+d=1
+dnas=[
+'TTACTACAAGAATTTTGTTCGACAA',
+'TTCGTATGTTAGGAGACAACGTCAT',
+'TAGAGAGCGAACAAGGCCTTAAACT',
+'GAAGTACAATATTCCGGATAACTGT',
+'TGTTTACAAGCTTCCCAATCAGCAA',
+'ACAAGGATGGACTCGAAGCCCACCC']
+
+def hammingdistance(p,q):
+    cuenta=0
+    for i,j in list(zip(p,q)):
+        if i!=j:
+            cuenta= cuenta+1
+    return(cuenta)
+
+def suffix (pattern):
+    return pattern [:len (pattern)-1]
+
+def primas (pattern, d):
+# Lista con primas
+    lista_primas = list ()
+
+    if len (pattern) == 1:
+        return ["A","C","G","T"]
+
+# Recalling para llegar al sufijo más bajo y empezar a construir primas
+    sufijo_de_patron = primas (suffix(pattern),d)
+    
+    for text in sufijo_de_patron:
+        if hammingdistance(suffix(pattern), text) < d:
+            for ncld in ["A","C","G","T"]:
+                lista_primas.append(text + ncld)
+        else:
+            lista_primas.append(text + pattern [-1])
+    return lista_primas
+
+
+def motifenumeration(dnas,k,d):
+    listaprimas=[]
+    for i in range(0,len(dnas[0])-k+1):
+        tpattern= dnas[0][i: k+i]
+        for j in primas(tpattern,d):
+            if not(j in listaprimas):
+                listaprimas.append(j)
+    for primo in listaprimas:
+        a=0
+        for seq in dnas:
+            for i in range(0,len(seq)-k+1):
+                subseq= seq[i: k+i]
+                if hammingdistance(primo, subseq) <= d:
+                    a=a+1
+                    break
+        if a==len(dnas):
+            print(primo)
+motifenumeration(dnas,k,d)
+
+#1.4) 
+
+k=6
+d=k
+pattern="A"*k
+dnas=[
+'CTGTGACTAGGTACCAATTAGCCCCGAGGTACTAGCTTCGGA',
+'CGGTCATGTAGATAACGAGGCTTTACTAGTTTCGGACTCGAA',
+'CTGAGCTGGGGGACTAGCCCCCGCTCAGCCGCAGTCTCACCT',
+'GGCCGACTCCTGGCAACTTAGGACGAGAATACTAGCATTGAC',
+'ACTAGAACACTTCTGCTCAACCATTATCGCTCGAATATGTCA',
+'ACTAGATTATGCAATTAGTTGGACAAGAAAAGGCCGATTTGG',
+'CCAATACCCGTGGGTCGCCCTCATACTAGTAGGAGGTTCCCG',
+'GCATTAGCCGGCGCGGGCCAATACAGGTCCTTCCAAACTAGC',
+'AGGAAGATCACCACTAGCGGGGCTTATTTTACCTTTTGCTCC',
+'CGAGGCTCCCTACATTGCCGCACCAAGTTTCCCTGTACTAGT',
+]
+
+def hammingdistance(p,q):
+    cuenta=0
+    for i,j in list(zip(p,q)):
+        if i!=j:
+            cuenta= cuenta+1
+    return(cuenta)
+
+def suffix (pattern):
+    return pattern [:len (pattern)-1]
+
+def primas (pattern, d):
+# Lista con primas
+    lista_primas = list ()
+
+    if len (pattern) == 1:
+        return ["A","C","G","T"]
+
+# Recalling para llegar al sufijo más bajo y empezar a construir primas
+    sufijo_de_patron = primas (suffix(pattern),d)
+    
+    for text in sufijo_de_patron:
+        if hammingdistance(suffix(pattern), text) < d:
+            for ncld in ["A","C","G","T"]:
+                lista_primas.append(text + ncld)
+        else:
+            lista_primas.append(text + pattern [-1])
+    return(lista_primas)
+                                 
+                    
+def medianstring(k,dnas,lista_primas):          
+    kmersypuntajes=[]
+    for kmer in lista_primas:
+        puntajetotal=0
+        for seq in dnas:
+            conteo=k
+            for i in range(0,len(seq)-k+1):
+                subseq= seq[i: k+i]
+                hd= hammingdistance(kmer, subseq)
+                if hd < conteo:
+                    conteo=hd
+            puntajetotal+=conteo
+        kmersypuntajes.append((kmer,puntajetotal))
+    #Ordenar tomar más corto posible
+    sorted_by_second = sorted(kmersypuntajes , key=lambda tup: tup[1])
+    menor = sorted_by_second [0][1]
+    for i in kmersypuntajes:
+        if i[1] <= menor:
+            print(i[0])
+    
+medianstring(k,dnas,primas(pattern,d))
+
+# 1.4) (version 2)
+
+def motifenumeration(dnas,k):
+list_posibles_kmers = list ()
+# Selecciono todos los kmers de todas las listas
+for f in range(0,len(dnas)):
+for i in range(0,len(dnas[f])-k+1):
+tpattern= dnas[f][i: k+i]
+list_posibles_kmers.append(tpattern)
+
+lista_final = list ()
+# comparo kmer de lista con todos los kmers en los adns
+for kmers in list_posibles_kmers:
+# variable para acumular la cuenta de las menores distancias posibles
+final_count = 0
+for text in dnas:
+minor_d = k
+for i in range(0,len(text)-k+1):
+tpattern= text [i: k+i]
+distance = hammingdistance(kmers,tpattern)
+if distance < minor_d:
+minor_d = distance
+final_count += minor_d
+if not (kmers in [i [0] for i in lista_final]):
+lista_final.append((kmers,final_count))
+
+#Ordenar tomar más corto posible
+sorted_by_second = sorted(lista_final , key=lambda tup: tup[1])
+menor = sorted_by_second [0][1]
+for i in lista_final:
+if i[1] <= menor:
+print(i[0])
+motifenumeration(dnas, k)
+
+#1.5) 
+
+text= 'GAATATTAAAATCCAGCCCTAATGAACCAGTTTAGTGACGTGAGGGGGATCTAAGGCGAATAGAAATACCTGAGCATCCGTTTTCTGCACTGTGGTAAGTGGAAAATGTTGGACAGCGGGTTCATAGGTAATGTGATCTAAGCGCAACAGCACTCTGTGTATACTCCAGCAAACAGATAAAACAATCACTAGAACTTGATCGGGCGAGACACACGGAGCATACGCGAAGTAGTTAAGTTGTTCGTTATAATAGGTTGAAGTTACGCGCTCTTGAGGATGCCTGAGATGCGCGGGCCCATGGACCGCTAGTTTTATTAAACGCCACGCCTAATCCCAGGTACCTAGCCAGTGAAAGCCGTCTCATCCCGATAGGGCGGCAGCTGGACTCGAGAGCCCGGGCGGACCTGCATGTCACAATTGACACTAGCTCCAAACTCAACATGTGGGAGTAGCTTACAGTTCGTACCGGGGGTACCGTTGGGCATACCTCAGGCCTGGCAGATATGTTCCGGACTGACACTGCGTGCCCAAGAGGCCTAATCGTAGCCTCTGCACCAGTAACGCCCTGGAAACCAGGTTTCTGGAATGGAATCTTCCAACGGTTTGCCACTATAGTAAAAGGTACGGTACCGGGACTCTATGGGGTCCTTCATGACTGGGCTGAATTGAACCCGACCAACGAGCCACCGAAAATATTCCTAAAAATCACACTTCAGCAGGTTGCACAGGCGTAACGTAGGGACCGGGGTCTTCTGCGGGTTCAGCGTGGACGCGCATCACCACGCCAGACCATTGAGAGTACTTCAAACGTAACTAGTTATTACTTTCGATGAACTAGCTTCCACCGATGGAAGATATGCCCCAAGTGTACAAGAATACAGTTGTTCCGCTGATTATTGTAACTCCAGCCTGGTTGAGAGACTTACACAAATGGTTCACATCTACGTCCTGGCATTACGGGGTAGGCCTGTACTCTCGATCGTGGGGACTCGGAACGTAC'
+k=15
+matrix= [[0.227, 0.182, 0.288, 0.273, 0.227, 0.318, 0.364, 0.348, 0.348, 0.303, 0.258, 0.288, 0.212, 0.167, 0.242],
+         [0.152, 0.333, 0.242, 0.152, 0.227, 0.258, 0.152, 0.212, 0.152, 0.167, 0.167, 0.258, 0.242, 0.333, 0.258],
+         [0.318, 0.258, 0.227, 0.333, 0.152, 0.258, 0.288, 0.197, 0.227, 0.288, 0.333, 0.258, 0.333, 0.242, 0.227],
+         [0.303, 0.227, 0.242, 0.242, 0.394, 0.167, 0.197, 0.242, 0.273, 0.242, 0.242, 0.197, 0.212, 0.258, 0.273]]
+
+
+def mostprobablekmer(text,k,matrix):
+    resultados=[]
+    for i in range(0,len(text)-k+1):
+        subseq= text[i:i+k]
+        cuenta= 1
+        for index,letra in enumerate(subseq):
+            if letra== 'A':
+                posm= 0
+            elif letra== 'C':
+                posm= 1
+            elif letra== 'G':
+                posm= 2
+            elif letra== 'T':
+                posm= 3
+            cuenta*=matrix[posm][index]
+        resultados.append((subseq,cuenta))
+    sorted_by_second = sorted(resultados , key=lambda tup: tup[1], reverse=True)
+    mayor = sorted_by_second [0][1]
+    for i in resultados:
+        if i[1] >= mayor:
+            print(i[0])
+        
+ 
+mostprobablekmer(text, k, matrix)
+         
+# 1.5b) 
+
+def score (profile,t):
+  return sum ([(1 - i)*t for i in profile.max(axis =0)])
+
+def fila (letra):
+  if letra == "A":
+    pos1 = 0
+  elif letra == "C":
+    pos1 = 1
+  elif letra == "G":
+    pos1 = 2
+  elif letra == "T":
+    pos1 = 3
+  return pos1
+  
+def calculate_prob (profile, kmer_ith_string):
+  prob = 1
+  for pos2, letra in enumerate (kmer_ith_string):
+    prob *= profile [fila(letra)] [pos2]
+  return prob
+
+def update_profile (profile, selected_kmer, t):
+  for column, letra in enumerate(selected_kmer):
+    profile [fila(letra)] [column] += (1/t)
+  return profile
+
+def create_kmer_profile (kmer,k ,t):
+  matriz = np.zeros(shape = (4,k))
+  for column, letra in enumerate (kmer):
+    # actualizamos matriz con el conteo de nucleotidos
+    matriz [fila(letra)][column] += (1/t)
+  return matriz
+
+
+def greedymotiffinding (strings_dna, k, t):
+  
+  # Contruimos profile con primer kmer de cada dna string
+  best_profile = np.zeros(shape = (4,k)) 
+  for i in strings_dna:
+    tpattern = i [:k]
+    best_profile = update_profile(best_profile,tpattern,t)
+  print ("Start profile: ")
+  print (best_profile)
+  
+  # Guardamos primera string dna
+  dnas = strings_dna.copy ()
+  first_string = dnas.pop (0)
+  
+  # Creamos profile con kmers de la primera dna string y actualizamos 
+  for i in range (0,len (first_string) - k+1):
+    kmers = first_string [i:k+i]
+    profile_kmer = create_kmer_profile(kmers,k,t)
+    list_selected_kmers = list ()
+    
+    # Almacenamos kmers con sus probabilidades 
+    for string in dnas:
+      list_probs = list ()
+      for j in range(0, len (string)-k+1):
+        kmer_ith_string = string [j:k+j]
+        list_probs.append(( kmer_ith_string ,calculate_prob(profile_kmer, kmer_ith_string)))
+      
+      # Guardamos mayor probabilidad existente en la string
+      major_prob = max ([i[1] for i in list_probs ])
+      
+      # Seleccionar el primer Kmer más probable
+      for mayor in list_probs:
+        if mayor [1] == major_prob:
+          selected_kmer = mayor [0]
+          break
+      
+      # Actualizar profile con Kmer más probable
+      profile_kmer = update_profile(profile_kmer, selected_kmer, t)
+      list_selected_kmers.append(selected_kmer)
+      
+    # Comparamos Score
+    if score(profile_kmer,t) < score (best_profile,t):
+      best_profile = profile_kmer 
+      ano = list_selected_kmers
+      ini = kmers
+      
+      
+  print ("Winner profile: ")
+  print (best_profile)
+  ano.insert (0,ini)
+  for i in ano:  
+    print (i)
+  return best_profile
+
+# 1.6) 
+
+def score (profile,t):
+  return sum ([(1 - i)*(t+4) for i in profile.max(axis =0)])
+
+def fila (letra):
+  if letra == "A":
+    pos1 = 0
+  elif letra == "C":
+    pos1 = 1
+  elif letra == "G":
+    pos1 = 2
+  elif letra == "T":
+    pos1 = 3
+  return pos1
+  
+def calculate_prob (profile, kmer_ith_string):
+  prob = 1
+  for pos2, letra in enumerate (kmer_ith_string):
+    prob *= profile [fila(letra)] [pos2]
+  return prob
+
+def update_profile (profile, selected_kmer, t):
+  for column, letra in enumerate(selected_kmer):
+    profile [fila(letra)] [column] += (1/(t+4))
+  return profile
+
+def create_kmer_profile (kmer,k ,t):
+  matriz = np.ones(shape = (4,k))
+  matriz = matriz * (1/(t+4))
+  for column, letra in enumerate (kmer):
+    # actualizamos matriz con el conteo de nucleotidos
+    matriz [fila(letra)][column] += (1/(t+4))
+  return matriz
+
+
+def greedymotiffinding (strings_dna, k, t):
+  
+  # Contruimos profile con primer kmer de cada dna string
+  best_profile = np.ones(shape = (4,k))
+  best_profile = best_profile * (1/(t+4))
+  for i in strings_dna:
+    tpattern = i [:k]
+    best_profile = update_profile(best_profile,tpattern,t)
+  print ("Start profile: ")
+  print (best_profile)
+  
+  # Guardamos primera string dna
+  dnas = strings_dna.copy ()
+  first_string = dnas.pop (0)
+  
+  # Creamos profile con kmers de la primera dna string y actualizamos 
+  for i in range (0,len (first_string) - k+1):
+    kmers = first_string [i:k+i]
+    profile_kmer = create_kmer_profile(kmers,k,t)
+    list_selected_kmers = list ()
+    
+    # Almacenamos kmers con sus probabilidades 
+    for string in dnas:
+      list_probs = list ()
+      for j in range(0, len (string)-k+1):
+        kmer_ith_string = string [j:k+j]
+        list_probs.append(( kmer_ith_string ,calculate_prob(profile_kmer, kmer_ith_string)))
+      
+      # Guardamos mayor probabilidad existente en la string
+      major_prob = max ([i[1] for i in list_probs ])
+      
+      # Seleccionar el primer Kmer más probable
+      for mayor in list_probs:
+        if mayor [1] == major_prob:
+          selected_kmer = mayor [0]
+          break
+      
+      # Actualizar profile con Kmer más probable
+      profile_kmer = update_profile(profile_kmer, selected_kmer, t)
+      list_selected_kmers.append(selected_kmer)
+      
+    # Comparamos Score
+    if score(profile_kmer,t) < score (best_profile,t):
+      best_profile = profile_kmer 
+      ano = list_selected_kmers
+      ini = kmers
+      
+      
+  print ("Winner profile: ")
+  print (best_profile)
+  ano.insert (0,ini)
+  for i in ano:  
+    print (i)
+  return best_profile
+
+greedymotiffinding(strings_dna, k, t),strings_dna
+
+
+# 1.7) 
+
+def distancebetweenpatternandstrings (pattern, strings_dna):
+  k = len (pattern)
+  distance = 0
+  for text in strings_dna:
+    hamm_dist = k
+    for i in range (0, len (text)-k+1):
+      kmers = text [i:k+i]
+      if hammingdistance(pattern, kmers) < hamm_dist:
+        hamm_dist = hammingdistance(pattern, kmers)
+    distance += hamm_dist
+  print (distance)
+
